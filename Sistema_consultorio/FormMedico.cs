@@ -26,7 +26,7 @@ namespace Sistema_consultorio
 
         private void FormDoctor_Load(object sender, EventArgs e)
         {
-            Llenar_DataGridView();
+            LLENAR_DATA_GRID_VIEW();
             int cantidad = dataGridView1.Rows.Count - 1;
             Total_lb.Text = cantidad.ToString();
         }
@@ -157,7 +157,7 @@ namespace Sistema_consultorio
         private void btnGuardarMedico_Click(object sender, EventArgs e)
         {
             DOCTOR_AGREGAR_MODIFICAR();
-            Llenar_DataGridView();
+            LLENAR_DATA_GRID_VIEW();
         }
 
 
@@ -175,29 +175,18 @@ namespace Sistema_consultorio
 
         ////////////////////////////////////LL///////////////////////////////////////
 
-        private void Llenar_DataGridView()
+        private void LLENAR_DATA_GRID_VIEW()
         {
-            //Los argumentos de conexion a la base de datos
-            string args = "Data Source=.;Initial Catalog=Consultas;Integrated Security=True";
-            SqlConnection conn = new SqlConnection();
-            conn.ConnectionString = args;
-
-            try
+            SqlConnection con = new SqlConnection(Clases.BD.conexxxion);
+            using (SqlCommand cmd = new SqlCommand("SELECCIONAR_DATOS_DOCTOR", con))
             {
-                //Indico el SP que voy a utilizar
-                SqlCommand command = new SqlCommand("SELECCIONAR_DATOS_DOCTOR", conn);
-                command.CommandType = CommandType.StoredProcedure;
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@ID_LICENCIA", SqlDbType.NVarChar).Value = DatosGlobales.ID_LICENCIA_GLOBAL;
 
-                SqlDataAdapter adapter = new SqlDataAdapter(command);
-
-                ////Envió los parámetros que necesito
-                //SqlParameter param = new SqlParameter("@percentage", SqlDbType.Int);
-                //param.Value = 100;
-                //command.Parameters.Add(param);
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
 
                 DataTable dt = new DataTable();
-
-                conn.Open();
+                con.Open();
 
                 //Aquí ejecuto el SP y lo lleno en el DataTable
                 adapter.Fill(dt);
@@ -205,12 +194,17 @@ namespace Sistema_consultorio
                 //Enlazo mis datos obtenidos en el DataTable con el grid
                 dataGridView1.DataSource = dt;
 
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
+                int cantidad = dataGridView1.Rows.Count - 1;
+                Total_lb.Text = cantidad.ToString();
+
+                con.Close();
+
+                //MessageBox.Show("Bienvenido: " + txt_USUARIO.Text);
             }
         }
+
+
+
         /////////////////////////////////////////////////////////////////////////////
         public void seleccion_data_Doctor()
         {
